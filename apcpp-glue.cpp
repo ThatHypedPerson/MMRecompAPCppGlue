@@ -80,7 +80,7 @@ extern "C"
     
     DLLEXPORT void recomp_get_exe_dir(char* path, size_t max_size)
     {
-        fprintf(stderr, "%s\n", std::filesystem::current_path().c_str());
+        fprintf(stderr, "%ls\n", std::filesystem::current_path().c_str());
     }
     
     DLLEXPORT void rando_init(uint8_t* rdram, recomp_context* ctx)
