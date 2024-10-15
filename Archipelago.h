@@ -80,7 +80,7 @@ void AP_RegisterSlotDataMapIntIntCallback(std::string, void (*f_slotdata)(std::m
 void AP_RegisterSlotDataRawCallback(std::string, void (*f_slotdata)(std::string));
 
 int64_t AP_GetSlotDataInt(const char* key);
-std::string AP_GetSlotDataString(const char* key);
+const char* AP_GetSlotDataString(const char* key);
 
 bool AP_GetDataPkgReceived();
 

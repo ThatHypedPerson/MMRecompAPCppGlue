@@ -1,6 +1,9 @@
+#include <filesystem>
+#include <fstream>
+
 #include <stdio.h>
 #include <stdlib.h>
-#include <filesystem>
+#include <assert.h>
 
 #include "Archipelago.h"
 #include "apcpp-glue.h"
@@ -45,7 +48,7 @@ T _arg(uint8_t* rdram, recomp_context* ctx) {
 
 template <typename T>
 void _return(recomp_context* ctx, T val) {
-    static_assert(sizeof(T) <= 4 && "Only 32-bit value returns supported currently");
+    static_assert(sizeof(T) <= 4, "Only 32-bit value returns supported currently");
     if constexpr (std::is_same_v<T, float>) {
         ctx->f0.fl = val;
     }
@@ -78,15 +81,60 @@ extern "C"
 {
     DLLEXPORT u32 recomp_api_version = 1;
     
-    DLLEXPORT void recomp_get_exe_dir(char* path, size_t max_size)
-    {
-        fprintf(stderr, "%ls\n", std::filesystem::current_path().c_str());
-    }
-    
     DLLEXPORT void rando_init(uint8_t* rdram, recomp_context* ctx)
     {
-        char path[512];
-        recomp_get_exe_dir(path, 512);
+        std::ifstream apconnect("apconnect.txt");
+        
+        if (apconnect.good())
+        {
+            std::string apEnabled;
+            getline(apconnect, apEnabled);
+            
+            if (apEnabled == "true")
+            {
+                std::string address;
+                std::string playerName;
+                std::string password;
+                
+                getline(apconnect, address);
+                getline(apconnect, playerName);
+                getline(apconnect, password);
+                
+                AP_Init(address.c_str(), "Majora's Mask Recompiled", playerName.c_str(), password.c_str());
+                //AP_Init("apsolostartinventory.json");
+                
+                AP_SetDeathLinkSupported(true);
+                
+                AP_Start();
+                
+                while (!AP_IsConnected())
+                {
+                    if (AP_GetConnectionStatus() == AP_ConnectionStatus::ConnectionRefused || AP_GetConnectionStatus() == AP_ConnectionStatus::NotFound)
+                    {
+                        AP_Stop();
+                        apconnect.close();
+                        //~ assert(false && "Couldn't connect to AP.");  // screw no ui just crash everything
+                        *((u8*) 0x0) = 0x0;  // screw no ui just crash everything
+                        return;
+                    }
+                }
+                
+                AP_QueueLocationScoutsAll();
+                if (AP_GetSlotDataInt("skullsanity") == 2)
+                {
+                    for (int i = 0x00; i <= 0x1E; ++i)
+                    {
+                        if (i == 0x03)
+                        {
+                            continue;
+                        }
+                        uint64_t location_id = 0x34769420062700 | i;
+                        AP_RemoveQueuedLocationScout(location_id);
+                    }
+                }
+                AP_SendQueuedLocationScouts(0);
+            }
+        }
     }
     
     DLLEXPORT void rando_skulltulas_enabled(uint8_t* rdram, recomp_context* ctx)
@@ -142,25 +190,25 @@ extern "C"
                 
                 else if (gi == GI_SWORD_KOKIRI)
                 {
-                    _return(ctx, (u32) MIN(GI_SWORD_KOKIRI + hasItem(GI_SWORD_KOKIRI), GI_SWORD_GILDED));
+                    _return(ctx, (u32) MIN(GI_SWORD_KOKIRI + hasItem(0x34769420000000 | GI_SWORD_KOKIRI), GI_SWORD_GILDED));
                     return;
                 }
                 
                 else if (gi == GI_QUIVER_30)
                 {
-                    _return(ctx, (u32) MIN(GI_QUIVER_30 + hasItem(GI_QUIVER_30), GI_QUIVER_50));
+                    _return(ctx, (u32) MIN(GI_QUIVER_30 + hasItem(0x34769420000000 | GI_QUIVER_30), GI_QUIVER_50));
                     return;
                 }
                 
                 else if (gi == GI_BOMB_BAG_20)
                 {
-                    _return(ctx, (u32) MIN(GI_BOMB_BAG_20 + hasItem(GI_BOMB_BAG_20), GI_BOMB_BAG_40));
+                    _return(ctx, (u32) MIN(GI_BOMB_BAG_20 + hasItem(0x34769420000000 | GI_BOMB_BAG_20), GI_BOMB_BAG_40));
                     return;
                 }
                 
                 else if (gi == GI_WALLET_ADULT)
                 {
-                    _return(ctx, (u32) MIN(GI_WALLET_ADULT + hasItem(GI_WALLET_ADULT), GI_WALLET_GIANT));
+                    _return(ctx, (u32) MIN(GI_WALLET_ADULT + hasItem(0x34769420000000 | GI_WALLET_ADULT), GI_WALLET_GIANT));
                     return;
                 }
                 
