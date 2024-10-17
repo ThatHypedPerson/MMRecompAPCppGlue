@@ -14,6 +14,8 @@
 #define GI_AP_FILLER GI_90
 #define GI_AP_USEFUL GI_B3
 
+#define TO_PTR(type, var) ((type*)(&rdram[(uint64_t)var - 0xFFFFFFFF80000000]))
+
 template<int index, typename T>
 T _arg(uint8_t* rdram, recomp_context* ctx) {
     static_assert(index < 4, "Only args 0 through 3 supported");
@@ -160,6 +162,13 @@ extern "C"
     DLLEXPORT void rando_send_death_link(uint8_t* rdram, recomp_context* ctx)
     {
         AP_DeathLinkSend();
+    }
+    
+    DLLEXPORT void rando_get_location_type(uint8_t* rdram, recomp_context* ctx)
+    {
+        u32 arg = _arg<0, u32>(rdram, ctx);
+        int64_t location = 0x34769420000000 | arg;
+        _return(ctx, (int) AP_GetLocationItemType(location));
     }
     
     DLLEXPORT void rando_get_item_id(uint8_t* rdram, recomp_context* ctx)
