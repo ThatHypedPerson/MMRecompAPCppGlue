@@ -115,7 +115,6 @@ extern "C"
                     {
                         AP_Stop();
                         apconnect.close();
-                        //~ assert(false && "Couldn't connect to AP.");  // screw no ui just crash everything
                         *((u8*) 0x0) = 0x0;  // screw no ui just crash everything
                         return;
                     }
@@ -130,12 +129,17 @@ extern "C"
                         {
                             continue;
                         }
-                        uint64_t location_id = 0x34769420062700 | i;
+                        uint64_t location_id = 0x3469420062700 | i;
                         AP_RemoveQueuedLocationScout(location_id);
                     }
                 }
                 AP_SendQueuedLocationScouts(0);
             }
+        }
+        
+        else
+        {
+            *((u8*) 0x0) = 0x0;  // no apconnect.txt, crash it
         }
     }
     
@@ -167,7 +171,7 @@ extern "C"
     DLLEXPORT void rando_get_location_type(uint8_t* rdram, recomp_context* ctx)
     {
         u32 arg = _arg<0, u32>(rdram, ctx);
-        int64_t location = 0x34769420000000 | arg;
+        int64_t location = 0x3469420000000 | arg;
         _return(ctx, (int) AP_GetLocationItemType(location));
     }
     
@@ -181,7 +185,7 @@ extern "C"
             return;
         }
         
-        int64_t location = 0x34769420000000 | arg;
+        int64_t location = 0x3469420000000 | arg;
         
         if (AP_GetLocationHasLocalItem(location))
         {
@@ -199,25 +203,25 @@ extern "C"
                 
                 else if (gi == GI_SWORD_KOKIRI)
                 {
-                    _return(ctx, (u32) MIN(GI_SWORD_KOKIRI + hasItem(0x34769420000000 | GI_SWORD_KOKIRI), GI_SWORD_GILDED));
+                    _return(ctx, (u32) MIN(GI_SWORD_KOKIRI + hasItem(0x3469420000000 | GI_SWORD_KOKIRI), GI_SWORD_GILDED));
                     return;
                 }
                 
                 else if (gi == GI_QUIVER_30)
                 {
-                    _return(ctx, (u32) MIN(GI_QUIVER_30 + hasItem(0x34769420000000 | GI_QUIVER_30), GI_QUIVER_50));
+                    _return(ctx, (u32) MIN(GI_QUIVER_30 + hasItem(0x3469420000000 | GI_QUIVER_30), GI_QUIVER_50));
                     return;
                 }
                 
                 else if (gi == GI_BOMB_BAG_20)
                 {
-                    _return(ctx, (u32) MIN(GI_BOMB_BAG_20 + hasItem(0x34769420000000 | GI_BOMB_BAG_20), GI_BOMB_BAG_40));
+                    _return(ctx, (u32) MIN(GI_BOMB_BAG_20 + hasItem(0x3469420000000 | GI_BOMB_BAG_20), GI_BOMB_BAG_40));
                     return;
                 }
                 
                 else if (gi == GI_WALLET_ADULT)
                 {
-                    _return(ctx, (u32) MIN(GI_WALLET_ADULT + hasItem(0x34769420000000 | GI_WALLET_ADULT), GI_WALLET_GIANT));
+                    _return(ctx, (u32) MIN(GI_WALLET_ADULT + hasItem(0x3469420000000 | GI_WALLET_ADULT), GI_WALLET_GIANT));
                     return;
                 }
                 
@@ -328,14 +332,14 @@ extern "C"
     DLLEXPORT void rando_has_item(uint8_t* rdram, recomp_context* ctx)
     {
         u32 arg = _arg<0, u32>(rdram, ctx);
-        int64_t location_id = ((int64_t) (((int64_t) 0x34769420000000) | ((int64_t) arg)));
+        int64_t location_id = ((int64_t) (((int64_t) 0x3469420000000) | ((int64_t) arg)));
         _return(ctx, hasItem(location_id));
     }
     
     DLLEXPORT void rando_send_location(uint8_t* rdram, recomp_context* ctx)
     {
         u32 arg = _arg<0, u32>(rdram, ctx);
-        int64_t location_id = ((int64_t) (((int64_t) 0x34769420000000) | ((int64_t) arg)));
+        int64_t location_id = ((int64_t) (((int64_t) 0x3469420000000) | ((int64_t) arg)));
         if (!AP_GetLocationIsChecked(location_id))
         {
             AP_SendItem(location_id);
@@ -345,7 +349,7 @@ extern "C"
     DLLEXPORT void rando_location_is_checked(uint8_t* rdram, recomp_context* ctx)
     {
         u32 arg = _arg<0, u32>(rdram, ctx);
-        int64_t location_id = ((int64_t) (((int64_t) 0x34769420000000) | ((int64_t) arg)));
+        int64_t location_id = ((int64_t) (((int64_t) 0x3469420000000) | ((int64_t) arg)));
         _return(ctx, AP_GetLocationIsChecked(location_id));
     }
     
