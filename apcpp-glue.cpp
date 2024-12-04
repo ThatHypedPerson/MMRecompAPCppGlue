@@ -174,6 +174,32 @@ extern "C"
         int64_t location = 0x3469420000000 | arg;
         _return(ctx, (int) AP_GetLocationItemType(location));
     }
+
+    DLLEXPORT void rando_get_location_item_name(uint8_t* rdram, recomp_context* ctx)
+    {
+        u32 arg = _arg<0, u32>(rdram, ctx);
+        int64_t location = 0x3469420000000 | arg;
+        
+        std::string itemName = AP_GetLocationItemName(location);
+
+        printf(itemName.c_str());
+        printf("\n");
+        
+        // _return(ctx, (int) AP_GetLocationItemType(location));
+    }
+
+    DLLEXPORT void rando_get_location_item_player_name(uint8_t* rdram, recomp_context* ctx)
+    {
+        u32 arg = _arg<0, u32>(rdram, ctx);
+        int64_t location = 0x3469420000000 | arg;
+        
+        std::string playerName = AP_GetLocationItemPlayer(location);
+
+        printf(playerName.c_str());
+        printf("\n");
+        
+        // _return(ctx, (int) AP_GetLocationItemType(location));
+    }
     
     DLLEXPORT void rando_get_item_id(uint8_t* rdram, recomp_context* ctx)
     {
