@@ -80,13 +80,6 @@ u32 hasItem(u64 itemId)
     return count;
 }
 
-void convertString(std::string name, unsigned char* truncated_name) // may still overflow out of textbox w/ long names
-{
-    // TODO: add '...' when the name is too long
-    std::strncpy(reinterpret_cast<char*>(truncated_name), name.c_str(), 31);
-    truncated_name[31] = 0;
-}
-
 extern "C"
 {
     DLLEXPORT u32 recomp_api_version = 1;
@@ -183,42 +176,31 @@ extern "C"
         _return(ctx, (int) AP_GetLocationItemType(location));
     }
 
+    int msg_index = 0;
+    unsigned char queued_message[32];
+    DLLEXPORT void rando_send_message(uint8_t* rdram, recomp_context* ctx)
+    {
+        msg_index++;
+        _return(ctx, (u32) queued_message[msg_index - 1]);
+    }
+
     DLLEXPORT void rando_get_location_item_name(uint8_t* rdram, recomp_context* ctx)
     {
         u32 arg = _arg<0, u32>(rdram, ctx);
         int64_t location = 0x3469420000000 | arg;
-        
-        unsigned char item_name_mm[32]; 
         std::string item_name = AP_GetLocationItemName(location);
-
-        convertString(item_name, item_name_mm);
-
-        // printf("%s\n", item_name.c_str());
-        printf("%s\n", reinterpret_cast<char*>(item_name_mm));
-        
-        // _return(ctx, item_name_mm);
+        std::strncpy(reinterpret_cast<char*>(queued_message), item_name.c_str(), 31);
+        msg_index = 0;
     }
 
     DLLEXPORT void rando_get_location_item_player_name(uint8_t* rdram, recomp_context* ctx)
     {
         u32 arg = _arg<0, u32>(rdram, ctx);
         int64_t location = 0x3469420000000 | arg;
-        unsigned char player_name_mm[32];
-
-        if (AP_GetLocationHasLocalItem(location))
-        {
-            std::strcpy(reinterpret_cast<char*>(player_name_mm), "You");
-        }
-        else
-        {
-            std::string player_name = AP_GetLocationItemPlayer(location);
-            // printf("%s\n", player_name.c_str());
-            convertString(player_name, player_name_mm);
-        }
-
-        printf("%s\n", reinterpret_cast<char*>(player_name_mm));
-        
-        // _return(ctx, player_name_mm);
+        std::string player_name = AP_GetLocationItemPlayer(location);
+        std::strncpy(reinterpret_cast<char*>(queued_message), player_name.c_str(), 16);
+        queued_message[player_name.length()] = 0;
+        msg_index = 0;
     }
     
     DLLEXPORT void rando_get_item_id(uint8_t* rdram, recomp_context* ctx)
